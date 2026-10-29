@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 10 Pro - Recording Session</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Segoe+UI:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Courier+Prime:wght@400;700&display=swap');
+
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        .bandicam-watermark {
+            position: fixed;
+            top: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 2px 14px;
+            border-radius: 4px;
+            color: #00ff66;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            pointer-events: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            text-shadow: 0 0 5px rgba(0, 255, 102, 0.5);
+        }
+
+        .win10-window {
+            background: #1f1f1f;
+            border: 1px solid #454545;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .win10-header {
+            background: #2d2d2d;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8px;
+            border-bottom: 1px solid #3d3d3d;
+        }
+
+        .win10-taskbar {
+            background: rgba(16, 16, 16, 0.85);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes fileGlitch {
+            0% { transform: translate(0) scale(1); }
+            20% { transform: translate(-2px, 2px) scale(1.05); color: #ff0055; }
+            40% { transform: translate(2px, -2px) scale(0.95); }
+            60% { transform: translate(-1px, -1px); filter: hue-rotate(90deg); }
+            100% { transform: translate(0) scale(1); }
+        }
+
+        .encrypting {
+            animation: fileGlitch 0.4s infinite;
+        }
+
+        .wncry-font {
+            font-family: 'Courier Prime', monospace;
+        }
+
+        .wncry-bg-red {
+            background-color: #840000;
+        }
+
+        .btn-retro {
+            background: linear-gradient(180deg, #eaeaea 0%, #bcbcbc 50%, #9e9e9e 100%);
+            border: 1px solid #707070;
+            color: #000;
+            font-weight: bold;
+            text-shadow: 0 1px 0 #fff;
+            box-shadow: inset 1px 1px 0 #fff, 1px 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .btn-retro:active {
+            background: linear-gradient(180deg, #9e9e9e 0%, #bcbcbc 50%, #eaeaea 100%);
+        }
+
+        .btn-retro-yellow {
+            background: linear-gradient(180deg, #fff0aa 0%, #ffd700 50%, #e6c200 100%);
+            border: 1px solid #998200;
+            color: #000;
+        }
+
+        /* Ending Overlay Cutscene */
+        #outro-screen {
+            background: rgba(0,0,0,0.95);
+            transition: all 1s ease-in-out;
+        }
+
+        /* Fake Cursor Animation */
+        #fake-cursor {
+            transition: all 2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen relative overflow-hidden select-none bg-black">
+
+    <!-- BANDICAM WATERMARK -->
+    <div class="bandicam-watermark">
+        www.BANDICAM.com
+    </div>
+
+    <!-- FAKE CURSOR FOR CUTSCENE -->
+    <div id="fake-cursor" class="fixed top-1/2 left-1/2 w-6 h-6 pointer-events-none z-[10000] hidden">
+        <svg class="w-full h-full drop-shadow-md" viewBox="0 0 24 24" fill="white" stroke="black" stroke-width="1.5">
+            <path d="M3 3l7 18 3-7 7-3L3 3z"/>
+        </svg>
+    </div>
+
+    <!-- DESKTOP CONTAINER -->
+    <div id="desktop" class="w-full h-[calc(100vh-40px)] relative bg-cover bg-center transition-all duration-700" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1920&auto=format&fit=crop');">
+        
+        <!-- DESKTOP WALLPAPER TEXT OVERLAY (When infected) -->
+        <div id="wallpaper-encrypted-overlay" class="hidden absolute inset-0 bg-black/95 flex flex-col items-center justify-center text-center p-6 z-0 border-8 border-red-900/50">
+            <h1 class="text-red-600 font-bold text-2xl sm:text-4xl mb-6 wncry-font tracking-wide animate-pulse">
+                Ooops, your important files are encrypted.
+            </h1>
+            <div class="max-w-2xl text-red-500 wncry-font text-sm sm:text-base space-y-4 leading-relaxed bg-red-950/20 p-6 rounded-lg border border-red-900/40 shadow-2xl">
+                <p>If you see this text, but don't see the "Wana Decrypt0r" window, then your antivirus removed the decrypt software or you deleted it from your computer.</p>
+                <p>If you need your files you have to run the decrypt software.</p>
+                <p class="text-yellow-400 font-bold">Please find an application file named "@WanaDecryptor@.exe" in any folder or restore from the antivirus quarantine.</p>
+                <p class="text-red-400 font-bold uppercase tracking-wider mt-4">Run and follow the instructions!</p>
+            </div>
+        </div>
+
+        <!-- DESKTOP ICONS GRID -->
+        <div class="relative z-10 p-4 grid grid-flow-col grid-rows-6 gap-4 w-max h-full">
+            <div onclick="openWindow('explorer-win')" class="w-20 h-20 flex flex-col items-center justify-center rounded hover:bg-white/10 border border-transparent hover:border-white/20 cursor-pointer group transition">
+                <div class="text-3xl mb-1 group-hover:scale-110 transition">📁</div>
+                <span class="text-xs text-white text-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] font-medium leading-tight">Documentos</span>
+            </div>
+
+            <div onclick="openWindow('edge-win')" class="w-20 h-20 flex flex-col items-center justify-center rounded hover:bg-white/10 border border-transparent hover:border-white/20 cursor-pointer group transition">
+                <div class="text-3xl mb-1 group-hover:scale-110 transition">🌐</div>
+                <span class="text-xs text-white text-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] font-medium leading-tight">Microsoft Edge</span>
+            </div>
+
+            <div id="icon-pictures" onclick="openWindow('explorer-win')" class="w-20 h-20 flex flex-col items-center justify-center rounded hover:bg-white/10 border border-transparent hover:border-white/20 cursor-pointer group transition">
+                <div id="img-icon-emoji" class="text-3xl mb-1 group-hover:scale-110 transition">🖼️</div>
+                <span id="img-icon-name" class="text-xs text-white text-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] font-medium leading-tight">Fotos_2026.png</span>
+            </div>
+
+            <div id="icon-notes" onclick="openWindow('notes-win')" class="w-20 h-20 flex flex-col items-center justify-center rounded hover:bg-white/10 border border-transparent hover:border-white/20 cursor-pointer group transition">
+                <div id="note-icon-emoji" class="text-3xl mb-1 group-hover:scale-110 transition">📝</div>
+                <span id="note-icon-name" class="text-xs text-white text-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] font-medium leading-tight">Claves_Bank.txt</span>
+            </div>
+
+            <div id="icon-malware" onclick="executeMalware()" class="w-20 h-20 flex flex-col items-center justify-center rounded hover:bg-red-500/20 border border-transparent hover:border-red-500/40 cursor-pointer group transition relative">
+                <div class="text-3xl mb-1 group-hover:scale-110 transition text-red-500">⚙️</div>
+                <span class="text-xs text-yellow-300 font-bold text-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] bg-black/60 px-1 rounded border border-yellow-500/30">malware_test.exe</span>
+                <span class="absolute -top-1 -right-1 bg-red-600 text-[9px] text-white px-1 font-bold rounded">NEW</span>
+            </div>
+        </div>
+
+        <!-- WEBCAM / STREAMER OVERLAY -->
+        <div id="webcam-box" class="absolute top-4 right-4 z-40 w-48 h-36 bg-gray-900 border-2 border-red-500/80 rounded-lg overflow-hidden shadow-2xl flex flex-col">
+            <div class="bg-gray-800 px-2 py-0.5 text-[10px] text-gray-300 flex justify-between items-center border-b border-gray-700">
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> CAM (YouTuber)</span>
+                <span id="cam-status" class="text-emerald-400 font-mono">LIVE</span>
+            </div>
+            <div class="relative flex-1 bg-black flex items-center justify-center overflow-hidden">
+                <video id="webcam-video" autoplay playsinline muted class="w-full h-full object-cover hidden"></video>
+                <div id="avatar-fallback" class="flex flex-col items-center justify-center gap-2">
+                    <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-purple-600 to-red-500 flex items-center justify-center text-2xl shadow-lg border-2 border-white/20 animate-pulse">
+                        🎙️
+                    </div>
+                    <span class="text-[11px] text-gray-400 font-semibold">TechTester_88</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- BANDICAM UI -->
+        <div id="bandicam-win" class="win10-window absolute top-12 left-12 w-80 z-30 hidden">
+            <div class="win10-header">
+                <div class="flex items-center gap-2 text-xs font-bold text-gray-200">
+                    <span class="text-red-500">🔴</span> Bandicam v5.1.0
+                </div>
+                <div class="flex items-center text-xs">
+                    <button onclick="toggleMinimize('bandicam-win')" class="px-2 py-0.5 hover:bg-gray-700 text-gray-300">━</button>
+                    <button onclick="closeWindow('bandicam-win')" class="px-2.5 py-0.5 hover:bg-red-600 text-gray-300">✕</button>
+                </div>
+            </div>
+            <div class="p-4 bg-gray-900 text-white flex flex-col gap-3 text-xs">
+                <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+                    <span class="text-gray-400">Recording Time:</span>
+                    <span id="rec-timer" class="text-red-500 font-mono text-base font-bold">00:01:24</span>
+                </div>
+                <button onclick="toggleMinimize('bandicam-win')" class="w-full bg-gray-700 hover:bg-gray-600 py-1.5 rounded text-gray-200">Minimize</button>
+            </div>
+        </div>
+
+        <!-- FILE EXPLORER -->
+        <div id="explorer-win" class="win10-window absolute top-20 left-48 w-[500px] h-80 z-20 hidden flex flex-col">
+            <div class="win10-header">
+                <div class="flex items-center gap-2 text-xs font-semibold text-gray-200">
+                    <span>📁</span> File Explorer - Documentos
+                </div>
+                <div class="flex items-center text-xs">
+                    <button onclick="toggleMinimize('explorer-win')" class="px-2 py-0.5 hover:bg-gray-700 text-gray-300">━</button>
+                    <button onclick="closeWindow('explorer-win')" class="px-2.5 py-0.5 hover:bg-red-600 text-gray-300">✕</button>
+                </div>
+            </div>
+            <div class="bg-gray-800 p-2 flex items-center gap-2 border-b border-gray-700 text-xs text-gray-300">
+                <span class="text-gray-500">📍 C:\Users\Admin\Documentos</span>
+            </div>
+            <div class="flex-1 bg-gray-900 p-4 grid grid-cols-3 gap-3 content-start overflow-y-auto">
+                <div class="explorer-file p-2 bg-gray-800/60 rounded border border-gray-700/50 flex items-center gap-2 text-xs text-gray-200">
+                    <span>📄</span> <span class="file-name">Proyecto_Final.docx</span>
+                </div>
+                <div class="explorer-file p-2 bg-gray-800/60 rounded border border-gray-700/50 flex items-center gap-2 text-xs text-gray-200">
+                    <span>📊</span> <span class="file-name">Presupuesto.xlsx</span>
+                </div>
+                <div class="explorer-file p-2 bg-gray-800/60 rounded border border-gray-700/50 flex items-center gap-2 text-xs text-gray-200">
+                    <span>🔑</span> <span class="file-name">Passwords.txt</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- WANNACRY DECRYPTOR GUI -->
+        <div id="wannacry-win" class="win10-window absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl wncry-bg-red p-4 rounded-lg border-2 border-red-900 z-50 hidden shadow-2xl">
+            <div class="flex justify-between items-center mb-3 border-b border-red-800 pb-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🔐</span>
+                    <div>
+                        <h1 class="text-lg font-black tracking-wider text-yellow-300 uppercase">Wanna Decryptor 2.0</h1>
+                        <p class="text-[10px] text-red-200">Simulation Environment — Educational Malware Demo</p>
+                    </div>
+                </div>
+                <button onclick="closeWindow('wannacry-win')" class="px-2 py-0.5 bg-red-950 hover:bg-red-800 text-white text-xs font-bold rounded">✕</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                <div class="md:col-span-4 flex flex-col gap-2">
+                    <div class="bg-black/90 p-2.5 rounded border border-red-900">
+                        <h2 class="text-[11px] font-bold text-yellow-400 uppercase">Payment will raise on</h2>
+                        <div id="timer1" class="text-xl font-bold text-center text-red-500 wncry-font my-1">00:00:05</div>
+                    </div>
+                    <div class="bg-black/90 p-2.5 rounded border border-red-900">
+                        <h2 class="text-[11px] font-bold text-red-500 uppercase">Your files will be lost on</h2>
+                        <div id="timer2" class="text-xl font-bold text-center text-red-600 wncry-font my-1">00:00:10</div>
+                    </div>
+                </div>
+
+                <div class="md:col-span-8 flex flex-col gap-2">
+                    <div class="bg-white text-black p-3 rounded h-52 overflow-y-auto text-xs leading-relaxed border border-gray-800">
+                        <h2 class="text-sm font-bold text-red-700 mb-1">Ooops, your files have been encrypted!</h2>
+                        <p class="mb-2 text-gray-800">Your important files are encrypted. Documents, photos, videos, databases and other files are no longer accessible because they have been encrypted.</p>
+                    </div>
+
+                    <div class="bg-black/90 p-2.5 rounded border border-red-900 flex flex-col sm:flex-row items-center gap-2">
+                        <div class="flex-1 w-full">
+                            <input type="text" readonly value="12t9YDPgwue1d5ERwWqDv2y69L49b6528" class="w-full bg-gray-900 text-yellow-300 px-2 py-1 text-xs wncry-font rounded border border-gray-700">
+                        </div>
+                        <button onclick="triggerVoiceover('Intento de desencriptacion fallido')" class="btn-retro px-3 py-1.5 text-xs rounded uppercase font-bold">Decrypt</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TASKBAR -->
+    <div class="win10-taskbar fixed bottom-0 left-0 right-0 h-10 z-50 flex items-center justify-between px-2 text-white">
+        <div class="flex items-center gap-1 h-full">
+            <button class="h-full px-3 hover:bg-white/10 flex items-center justify-center transition">
+                <svg class="w-4 h-4 fill-current text-blue-400" viewBox="0 0 88 88"><path d="M0 12.402l35.687-4.86.016 34.423-35.67.203zm35.67 33.521l.028 34.453L0 75.544l.017-29.82zm4.326-39.04L88 0v41.213l-48.004.228zm48.004 45.42L88 88l-48.004-6.738-.012-34.133z"/></svg>
+            </button>
+            <button onclick="openWindow('explorer-win')" class="h-full px-2.5 hover:bg-white/10 flex items-center justify-center text-base transition border-b-2 border-blue-500">📁</button>
+            <button onclick="openWindow('bandicam-win')" class="h-full px-2.5 hover:bg-white/10 flex items-center justify-center text-base transition border-b-2 border-red-500">🔴</button>
+        </div>
+        <div class="flex items-center gap-3 text-xs text-gray-300 font-sans">
+            <span id="clock-time">12:00 PM</span>
+        </div>
+    </div>
+
+    <!-- CINEMATIC OUTRO & SECOND PC OVERLAY -->
+    <div id="outro-screen" class="fixed inset-0 z-[99999] hidden flex-col items-center justify-center text-white p-6">
+        <div id="browser-2nd-pc" class="w-full max-w-4xl bg-gray-900 border border-gray-700 rounded-lg shadow-2xl overflow-hidden flex flex-col h-[500px]">
+            <div class="bg-gray-800 px-3 py-2 flex items-center gap-2 border-b border-gray-700 text-xs">
+                <div class="flex gap-1.5">
+                    <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                    <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                    <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                </div>
+                <div id="browser-url" class="bg-gray-900 text-gray-300 px-3 py-1 rounded w-full border border-gray-700 font-mono text-xs flex justify-between">
+                    <span>https://studio.youtube.com/channel/upload</span>
+                    <span class="text-emerald-400 font-bold">2ND PC CONNECTED</span>
+                </div>
+            </div>
+
+            <div id="studio-upload-panel" class="flex-1 p-6 bg-gray-950 flex flex-col items-center justify-center gap-4 text-center">
+                <div class="w-16 h-16 rounded-full bg-red-600/20 border border-red-500 flex items-center justify-center text-3xl text-red-500 animate-pulse">
+                    📤
+                </div>
+                <h2 class="text-xl font-bold text-white">Subiendo Video de Grabación Bandicam...</h2>
+                <div class="bg-gray-900 p-4 rounded border border-gray-800 w-full max-w-lg text-left text-xs font-mono">
+                    <p class="text-gray-400">Título:</p>
+                    <p class="text-yellow-400 font-bold mb-2">PROBANDO UNA APP (MI PC MURIÓ) - Video_Bandicam_001.mp4</p>
+                    <p class="text-gray-400">Origen de descarga:</p>
+                    <p id="dark-url-text" class="text-red-400">dark.net/download/no-escape.exe/free</p>
+                </div>
+                <div class="w-full max-w-lg bg-gray-800 h-3 rounded-full overflow-hidden border border-gray-700">
+                    <div id="upload-progress" class="bg-blue-500 h-full w-[10%] transition-all duration-300"></div>
+                </div>
+                <p id="upload-status-text" class="text-xs text-gray-400">Procesando archivo de video HD...</p>
+            </div>
+        </div>
+
+        <!-- TEASER TEXT OVERLAY -->
+        <div id="teaser-overlay" class="hidden flex-col items-center gap-3 mt-6 text-center animate-fade-in">
+            <h1 class="text-3xl sm:text-5xl font-black text-red-500 tracking-widest uppercase">FIN</h1>
+            <p class="text-lg text-yellow-300 font-semibold">Pronto habrá una continuación...</p>
+            <p class="text-xs text-gray-500 font-mono">Redirigiendo a parte2.html...</p>
+        </div>
+    </div>
+
+    <script>
+        function triggerVoiceover(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'es-ES';
+                utterance.rate = 1.05;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function openWindow(id) { document.getElementById(id)?.classList.remove('hidden'); }
+        function closeWindow(id) { document.getElementById(id)?.classList.add('hidden'); }
+        function toggleMinimize(id) { document.getElementById(id)?.classList.toggle('hidden'); }
+
+        let isInfected = false;
+        function executeMalware() {
+            if (isInfected) return;
+            isInfected = true;
+
+            triggerVoiceover("A ver, ejecutamos el instalador del malware... ¡Madre mía bro! ¿Qué le pasó a la pantalla?");
+
+            document.getElementById('icon-pictures').classList.add('encrypting');
+            document.getElementById('icon-notes').classList.add('encrypting');
+
+            setTimeout(() => {
+                document.getElementById('img-icon-emoji').innerText = '🔒';
+                document.getElementById('img-icon-name').innerText = 'Fotos.WNCRY';
+                document.getElementById('img-icon-name').classList.add('text-red-400');
+
+                document.getElementById('note-icon-emoji').innerText = '🔒';
+                document.getElementById('note-icon-name').innerText = 'Claves.WNCRY';
+                document.getElementById('note-icon-name').classList.add('text-red-400');
+            }, 1200);
+
+            setTimeout(() => {
+                document.getElementById('wallpaper-encrypted-overlay').classList.remove('hidden');
+            }, 2500);
+
+            setTimeout(() => {
+                openWindow('wannacry-win');
+                startCinematicOutroCountdown();
+            }, 4200);
+        }
+
+        // Outro Animation Sequence
+        function startCinematicOutroCountdown() {
+            let timer = 8;
+            const interval = setInterval(() => {
+                timer--;
+                document.getElementById('timer1').innerText = `00:00:0${timer}`;
+                document.getElementById('timer2').innerText = `00:00:0${timer}`;
+
+                if (timer <= 0) {
+                    clearInterval(interval);
+                    startCinematicOutro();
+                }
+            }, 1000);
+        }
+
+        function startCinematicOutro() {
+            triggerVoiceover("Bueno gente, la PC quedó totalmente frita... me toca ir a mi otra PC a subir este video.");
+
+            setTimeout(() => {
+                const outroScreen = document.getElementById('outro-screen');
+                outroScreen.classList.remove('hidden');
+                outroScreen.classList.add('flex');
+
+                let progress = 10;
+                const uploadInt = setInterval(() => {
+                    progress += 25;
+                    document.getElementById('upload-progress').style.width = progress + '%';
+
+                    if (progress >= 100) {
+                        clearInterval(uploadInt);
+                        document.getElementById('upload-status-text').innerText = "¡Video subido exitosamente a YouTube!";
+                        document.getElementById('upload-status-text').classList.add('text-emerald-400', 'font-bold');
+
+                        // Show Teaser Screen
+                        setTimeout(() => {
+                            document.getElementById('teaser-overlay').classList.remove('hidden');
+                            document.getElementById('teaser-overlay').classList.add('flex');
+
+                            // Redirect to parte2.html
+                            setTimeout(() => {
+                                window.location.href = "parte2.html";
+                            }, 3500);
+                        }, 1500);
+                    }
+                }, 800);
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
