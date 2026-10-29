@@ -19,10 +19,10 @@ An interactive, 100% harmless web-based simulation of the iconic **WannaCry (WNC
 ## 🚀 Quick Start
 
 1. **Clone the repository:**
-   ```bash
+   ```bas
    git clone [https://github.com/anyelo888ra-ux/wannacry-web-simulator.git](https://github.com/anyelo888ra-ux/wannacry-web-simulator.git)
 
-``
+```
 
 2. **Open the project:**
 Simply open `index.html` in any modern web browser, or host it locally.
